@@ -10,15 +10,27 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.9/d3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
-    <div id="app">
+    <div id="app" class="gtx-web">
       <div class="topbar">
-        <img class="menu-icon" src="image/menu-button.png">
+        <img class="menu-icon" src="image/menu-button.png" v-if="!openSidePanel" v-on:click="openSidePanel = true;">
+        <img class="menu-icon" src="image/cross.png" v-if="openSidePanel" v-on:click="openSidePanel = false;">
         <a class="title" href="">細懸浮微粒(PM2.5)污染來源分析系統</a>
       </div>
-      <div class="side-panel"></div>
-      <div class="main-content"></div>
+      <div class="side-panel" v-bind:class="{open: openSidePanel}">
+        <ul>
+          <li v-bind:class="{active: activePage==0}" v-on:click="activePage=0;">GTx 模式簡介</li>
+          <li v-bind:class="{active: activePage==1}" v-on:click="activePage=1;">測站7日分析及3日預報</li>
+          <li v-bind:class="{active: activePage==2}" v-on:click="activePage=2;">工廠煙線模擬</li>
+          <li v-bind:class="{active: activePage==3}" v-on:click="activePage=3;">汚染來源地圖</li>
+          <li v-bind:class="{active: activePage==4}" v-on:click="activePage=4;">AI修正結果</li>
+        </ul>
+      </div>
+      <div class="main-content">
+        <div id="map" v-show="activePage == 3"></div>
+      </div>
     </div>
 
+    <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false&key=AIzaSyBaIqOiukpEcNxfb4eninHI72VXtscnxm8"></script>
     <script src="main.js"></script>
   </body>
 </html>
