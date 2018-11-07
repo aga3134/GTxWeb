@@ -36,11 +36,9 @@ var g_APP = new Vue({
       this.openSidePanel = !this.openSidePanel;
       var mainContent = $(".main-content");
       if(mainContent.width() > 640 && this.openSidePanel){
-        mainContent.css("left","250px");
         mainContent.css("width","calc(100% - 250px)");
       }
       else{
-        mainContent.css("left","0px");
         mainContent.css("width","100%");
       }
     }
