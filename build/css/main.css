@@ -14,6 +14,9 @@ html, body {
   width: 100%;
   height: 100%; }
   .gtx-web .topbar {
+    z-index: 9;
+    position: fixed;
+    top: 0px;
     width: 100%;
     height: 50px;
     font-size: 1.5em;
@@ -38,6 +41,9 @@ html, body {
       top: 10px;
       left: 10px;
       cursor: pointer; }
+  .gtx-web .bar-padding {
+    width: 100%;
+    height: 50px; }
   .gtx-web .side-panel {
     z-index: 10;
     position: fixed;
@@ -47,6 +53,7 @@ html, body {
     transition: left 0.5s ease;
     height: 100%;
     width: 250px;
+    overflow-y: auto;
     max-width: calc(100% - 50px);
     background-color: #f2f2f2;
     border: 1px solid #ccc; }
@@ -73,8 +80,30 @@ html, body {
           background-color: white;
           color: #2b7dbc; }
   .gtx-web .main-content {
+    position: absolute;
+    top: 50px;
+    left: 0px;
     width: 100%;
-    height: calc(100% - 50px); }
+    height: calc(100% - 50px);
+    -webkit-transition: left 0.5s ease;
+    transition: left 0.5s ease; }
     .gtx-web .main-content #map {
       width: 100%;
       height: 100%; }
+    .gtx-web .main-content .page-content {
+      padding: 20px; }
+      .gtx-web .main-content .page-content .page-header {
+        border-bottom: 1px dotted #e2e2e2;
+        padding-bottom: 16px;
+        padding-top: 7px;
+        margin: 0 0 12px; }
+      .gtx-web .main-content .page-content h1 {
+        color: #2679b5;
+        font-size: 1.5em; }
+      .gtx-web .main-content .page-content h3 {
+        margin: 20px 0px 10px 0px; }
+      .gtx-web .main-content .page-content li {
+        padding: 5px; }
+      .gtx-web .main-content .page-content .table-container {
+        max-width: 100%;
+        overflow-x: auto; }

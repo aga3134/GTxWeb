@@ -32,6 +32,9 @@ $pad-media: 640px;
 	width: 100%;
 	height: 100%;
 	.topbar{
+		z-index: 9;
+		position: fixed;
+		top: 0px;
 		width: 100%;
 		height: 50px;
 		font-size: 1.5em;
@@ -60,6 +63,10 @@ $pad-media: 640px;
 			cursor: pointer;
 		}
 	}
+	.bar-padding{
+		width: 100%;
+		height: 50px;
+	}
 
 	.side-panel{
 		z-index: 10;
@@ -73,6 +80,7 @@ $pad-media: 640px;
 	    transition: left 0.5s ease;
 		height: 100%;
 		width: 250px;
+		overflow-y: auto;
 		max-width: calc(100% - 50px);
 		background-color: #f2f2f2;
 		border: 1px solid #ccc;
@@ -104,11 +112,39 @@ $pad-media: 640px;
 	}
 
 	.main-content{
+		position: absolute;
+		top: 50px;
+		left: 0px;
 		width: 100%;
 		height: calc(100% - 50px);
+		-webkit-transition: left 0.5s ease;
+	    transition: left 0.5s ease;
 		#map{
 			width: 100%;
 			height: 100%;
+		}
+		.page-content{
+			padding: 20px;
+			.page-header{
+				border-bottom: 1px dotted #e2e2e2;
+				padding-bottom: 16px;
+				padding-top: 7px;
+				margin: 0 0 12px;
+			}
+			h1{
+				color: #2679b5;
+				font-size: 1.5em;
+			}
+			h3{
+				margin: 20px 0px 10px 0px;
+			}
+			li{
+				padding: 5px;
+			}
+			.table-container{
+				max-width: 100%;
+				overflow-x: auto;
+			}
 		}
 	}
 }

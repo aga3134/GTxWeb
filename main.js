@@ -1,7 +1,7 @@
 var g_APP = new Vue({
   el: "#app",
   data: {
-    activePage: 0,
+    activePage: 1,
     openSidePanel: false
   },
   created: function () {
@@ -31,6 +31,18 @@ var g_APP = new Vue({
 
       });
       
+    },
+    ToggleSidePanel: function(){
+      this.openSidePanel = !this.openSidePanel;
+      var mainContent = $(".main-content");
+      if(mainContent.width() > 640 && this.openSidePanel){
+        mainContent.css("left","250px");
+        mainContent.css("width","calc(100% - 250px)");
+      }
+      else{
+        mainContent.css("left","0px");
+        mainContent.css("width","100%");
+      }
     }
   }
 });
