@@ -31,6 +31,14 @@ $pad-media: 640px;
 .gtx-web{
 	width: 100%;
 	height: 100%;
+	input{
+		padding: 3px;
+		margin: 5px;
+	}
+	select{
+		padding: 5px;
+		margin: 5px;
+	}
 	.topbar{
 		z-index: 9;
 		position: fixed;
@@ -121,6 +129,27 @@ $pad-media: 640px;
 	    transition: left 0.5s ease;
 	    -webkit-transition: width 0.5s ease;
 	    transition: width 0.5s ease;
+	    .content-title{
+	    	font-size: 1.5em;
+	    	color: #2679b5;
+	    	margin: 5px;
+	    }
+	    .sub-title{
+	    	font-size: 1.2em;
+	    	color: #393939;
+	    	margin: 5px;
+	    	padding: 10px;
+	    }
+	    .grads-container{
+	    	display: flex;
+	    	justify-content: flex-start;
+	    	align-items: flex-start;
+	    	flex-wrap: wrap;
+	    	img{
+	    		width: 300px;
+	    		margin: 10px;
+	    	}
+	    }
 		#map{
 			width: 100%;
 			height: 100%;
@@ -147,6 +176,29 @@ $pad-media: 640px;
 				max-width: 100%;
 				overflow-x: auto;
 			}
+		}
+	}
+
+	.timebar{
+		position: fixed;
+		bottom: 0px;
+		left: 0px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-wrap: wrap;
+		width: 100%;
+		background-color: #438eb9;
+		color: white;
+		.option-bar{
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			overflow-y: hidden;
+			height: 60px;
+			padding: 10px;
 		}
 	}
 }
