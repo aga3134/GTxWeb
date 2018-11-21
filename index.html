@@ -33,21 +33,18 @@
           <div class="graph-container"></div>
           <div class="sub-title">日均值貢獻濃度及逆軌跡線圖</div>
           <div class="grads-container">
-            <img v-for="image in btrajImages" v-bind:src="image">
+            <img v-for="image in btrajImages" v-bind:src="image" v-on:click="OpenImageBox(image);">
           </div>
         </div>
 
         <div class="ftraj" v-show="activePage == 2">
           <div class="content-title">工廠煙線模擬</div>
           <div class="grads-container">
-            <img v-for="image in ftrajImages" v-bind:src="image">
+            <img v-for="image in ftrajImages" v-bind:src="image" v-on:click="OpenImageBox(image);">
           </div>
         </div>
 
-        <div class="source-map" v-show="activePage == 3">
-          <div class="content-title">汚染來源地圖</div>
-          <div id="map"></div>
-        </div>
+        <div v-show="activePage == 3" id="map"></div>
 
         <div class="ai-correct" v-show="activePage == 4">
           <div class="content-title">AI修正結果</div>
@@ -68,10 +65,15 @@
             </select>
 
             <div class="option-bar" v-show="activePage == 3 || activePage == 4">
-              時間 <input type="range" v-bind:min="timebarMin" v-bind:max="timebarMax" v-model="timebarValue" v-on:change="ChangeTime();"> {{currentTime}}
+              小時 <input type="range" v-bind:min="timebarMin" v-bind:max="timebarMax" v-model="timebarValue" v-on:change="ChangeTime();">
             </div>
           </div>
           
+        </div>
+
+        <div class="image-box" v-show="showImageBox" v-on:click.self="showImageBox=false;">
+          <img class="content" v-bind:src="selectImage">
+          <img class="close-bt" src="image/cross.png" v-on:click="showImageBox=false;">
         </div>
 
         <div class="page-content" v-if="activePage==0">

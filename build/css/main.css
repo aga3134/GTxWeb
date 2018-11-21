@@ -14,10 +14,9 @@ html, body {
   width: 100%;
   height: 100%; }
   .gtx-web input {
-    padding: 3px;
     margin: 5px; }
   .gtx-web select {
-    padding: 5px;
+    padding: 2px;
     margin: 5px; }
   .gtx-web .topbar {
     z-index: 9;
@@ -98,7 +97,8 @@ html, body {
     .gtx-web .main-content .content-title {
       font-size: 1.5em;
       color: #2679b5;
-      margin: 5px; }
+      margin: 5px;
+      padding: 10px; }
     .gtx-web .main-content .sub-title {
       font-size: 1.2em;
       color: #393939;
@@ -150,5 +150,31 @@ html, body {
       flex-wrap: nowrap;
       overflow-x: auto;
       overflow-y: hidden;
-      height: 60px;
+      height: 50px;
       padding: 10px; }
+  .gtx-web .image-box {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    background-color: rgba(200, 200, 200, 0.9);
+    cursor: pointer; }
+    .gtx-web .image-box .content {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      height: calc(100% - 20px);
+      border-radius: 2px;
+      max-width: 100%;
+      object-fit: contain;
+      -webkit-transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%); }
+    .gtx-web .image-box .close-bt {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px; }

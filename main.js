@@ -10,8 +10,10 @@ var g_APP = new Vue({
     timebarValue: 0,
     selectStation: "EPA001",
     selectFactory: "L0200473",
+    selectImage: "image/no-image.png",
     btrajImages: [],
-    ftrajImages: []
+    ftrajImages: [],
+    showImageBox: false
   },
   created: function () {
     google.maps.event.addDomListener(window, 'load', this.InitMap);
@@ -114,6 +116,10 @@ var g_APP = new Vue({
           this.ftrajImages.push("image/no-image.png");
         }
       }
+    },
+    OpenImageBox: function(url){
+      this.selectImage = url;
+      this.showImageBox = true;
     }
   }
 });
