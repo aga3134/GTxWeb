@@ -30,7 +30,15 @@
       <div class="main-content">
         <div class="btraj" v-show="activePage == 1">
           <div class="content-title">測站7日分析及3日預報</div>
-          <div class="graph-container"></div>
+          <div class="graph-container">
+            <svg id="btrajGraph"></svg>
+            <div class="company-list">
+              <div class="company-switch" v-for="c in companyArr">
+                <div class="icon" v-bind:style="{'background-color':c.color}">&nbsp;</div>
+                <div class="name">{{c.company_name}}</div>
+              </div>
+            </div>
+          </div>
           <div class="sub-title">日均值貢獻濃度及逆軌跡線圖</div>
           <div class="grads-container">
             <img v-for="image in btrajImages" v-bind:src="image" v-on:click="OpenImageBox(image);">
@@ -59,12 +67,19 @@
               <option value="EPA002">汐止</option>
             </select>
 
+            <select v-model="selectPollution" v-on:change="ChangePollution();" v-show="activePage == 1">
+              <option value="pmf">PM2.5</option>
+              <option value="pm10">PM10</option>
+              <option value="so2">SO2</option>
+              <option value="nox">NOx</option>
+            </select>
+
             <select v-model="selectFactory" v-on:change="ChangeFactory();" v-show="activePage == 2">
               <option value="6NCP">六輕(麥寮鄉)</option>
               <option value="C1400170">協和發電廠</option>
             </select>
 
-            <div class="option-bar" v-show="activePage == 3 || activePage == 4">
+            <div class="option-bar" v-show="activePage == 1 || activePage == 4">
               小時 <input type="range" v-bind:min="timebarMin" v-bind:max="timebarMax" v-model="timebarValue" v-on:change="ChangeTime();">
             </div>
           </div>
