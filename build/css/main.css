@@ -112,28 +112,47 @@ html, body {
       .gtx-web .main-content .grads-container img {
         width: 300px;
         margin: 10px; }
+    .gtx-web .main-content .graph-container {
+      position: relative; }
     .gtx-web .main-content #btrajGraph {
       padding: 10px;
       width: 100%;
       height: 400px; }
+    .gtx-web .main-content #hoverDialog {
+      position: absolute;
+      top: 0px;
+      left: 10px;
+      background-color: #ffffff;
+      border: 2px solid #ff0000;
+      font-size: 0.8em;
+      text-align: center;
+      padding: 10px 20px;
+      opacity: 0;
+      -webkit-transition: top 0.5s ease, left 0.5s ease, opacity 0.5s ease;
+      transition: top 0.5s ease, left 0.5s ease, opacity 0.5s ease; }
     .gtx-web .main-content .company-list {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      margin: 10px; }
+      margin: 10px;
+      cursor: pointer; }
       .gtx-web .main-content .company-list .company-switch {
         width: 150px;
         margin: 10px;
         display: flex;
         align-items: center; }
         .gtx-web .main-content .company-list .company-switch .icon {
+          background-color: #AAB3B3;
           display: inline-block;
           width: 30px;
           height: 15px;
           margin-right: 10px; }
         .gtx-web .main-content .company-list .company-switch .name {
           display: inline-block;
-          font-size: 0.8em; }
+          font-size: 0.8em;
+          color: #AAB3B3; }
+          .gtx-web .main-content .company-list .company-switch .name.active {
+            color: #000000; }
     .gtx-web .main-content #map {
       width: 100%;
       height: 100%; }

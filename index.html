@@ -32,10 +32,16 @@
           <div class="content-title">測站7日分析及3日預報</div>
           <div class="graph-container">
             <svg id="btrajGraph"></svg>
+            <div id="hoverDialog">123</div>
             <div class="company-list">
-              <div class="company-switch" v-for="c in companyArr">
-                <div class="icon" v-bind:style="{'background-color':c.color}">&nbsp;</div>
-                <div class="name">{{c.company_name}}</div>
+              <div class="company-switch" v-for="(c,i) in companyArr" v-on:click="SwitchCompany(i);">
+                <div v-if="c.active" class="icon" v-bind:style="{'background-color':c.color}">&nbsp;</div>
+                <div v-else class="icon">&nbsp;</div>
+                <div class="name" v-bind:class="{active: c.active}">{{c.company_name}}</div>
+              </div>
+              <div class="company-switch" v-on:click="SwitchCompanyAll();">
+                <div class="icon">&nbsp;</div>
+                <div class="name active">ALL</div>
               </div>
             </div>
           </div>
