@@ -18,7 +18,7 @@ def InterpolateRGB(sColor,eColor,value):
 
 def GetColor(value):
     if value == 0:
-        return 0,0,0,255
+        return 0,0,0,0
     
     palette = []
     palette.append({"r":255,"g":255,"b":255,"v":0})

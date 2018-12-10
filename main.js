@@ -8,7 +8,7 @@ var g_APP = new Vue({
     timebarMin: 0,
     timebarMax: 96,
     timebarValue: 0,
-    selectStation: "EPA001",
+    selectStation: "EPA036",
     selectFactory: "L0200473",
     selectPollution: "pmf",
     selectImage: "image/no-image.png",
@@ -18,13 +18,24 @@ var g_APP = new Vue({
     btrajImages: [],
     ftrajImages: [],
     stationArr: [],
+    stationHash: {},
     companyArr: [],
-    showImageBox: false
+    companyHash: {},
+    showImageBox: false,
+    map: null,
+    mapOverlay: "",
+    mapOverlayOpacity: 0.5,
+    selectOverlay: "A0"
   },
   created: function () {
     $.get("/data/station.php",function(result){
       this.stationArr = JSON.parse(result);
+      this.stationHash = d3.nest()
+          .key(function(d){return d.station_id;})
+          .map(this.stationArr);
+      //console.log(this.stationHash);
     }.bind(this));
+    
 
     $.get("/data/company.php",function(result){
       this.companyArr = JSON.parse(result);
@@ -71,11 +82,16 @@ var g_APP = new Vue({
       this.companyArr.sort(function(a, b) {
         return a.serial - b.serial;
       });
+      this.companyHash = d3.nest()
+          .key(function(d){return d.company_id;})
+          .map(this.companyArr);
+      //console.log(this.companyHash);
 
       google.maps.event.addDomListener(window, 'load', this.InitMap);
       this.UpdateImage();
       this.UpdateBtrajGraph();
     }.bind(this));
+    
     
   },
   methods: {
@@ -83,25 +99,133 @@ var g_APP = new Vue({
       var loc = {lat: 23.682094, lng: 120.7764642, zoom: 7};
       var taiwan = new google.maps.LatLng(loc.lat,loc.lng);
 
-      map = new google.maps.Map(document.getElementById('map'), {
+      this.map = new google.maps.Map(document.getElementById('map'), {
         center: taiwan,
         zoom: loc.zoom,
         scaleControl: true,
         mapTypeControl: false
       });
 
-      google.maps.event.addListener(map, 'click', function(event) {
+      google.maps.event.addListener(this.map, 'click', function(event) {
 
       });
 
-      map.addListener('dragend', function() {
+      this.map.addListener('dragend', function() {
 
       });
 
-      map.addListener('zoom_changed', function() {
+      this.map.addListener('zoom_changed', function() {
 
       });
+      this.mapOverlay = new USGSOverlay(this.map);
       
+    },
+    MapValueToColor: function(v){
+      var color = d3.scale.linear().domain([0,0.001,0.01,0.02,0.03,0.04,0.05,0.08,0.1,1000])
+            .range(["#FFFFFF","#FFFFFF","#1E3CFF","#00C8C8","#00DC00","#E6DC32","#F08228","#FA3C3C","#A000C8","#A000C8"]);
+      if(!v) return "#FFFFFF";
+      else return color(parseFloat(v));
+    },
+    ClearMap: function(){
+      for(var station in this.stationHash){
+        if(this.stationHash[station][0].marker){
+          this.stationHash[station][0].marker.setMap(null);
+        }
+      }
+      for(var company in this.companyHash){
+        if(this.companyHash[company][0].marker){
+          this.companyHash[company][0].marker.setMap(null);
+        }
+      }
+    },
+    UpdateMap: function(){
+      this.ClearMap();
+
+      if(this.mapOverlay){
+        var selectDate = moment(this.currentDate,"YYYY-MM-DD");
+        var curDate = selectDate.format("YYYYMMDD");
+        var path = "forWEBsite/bin2txt/btraj/"+curDate+"/";
+        var file = path+"b_"+this.selectStation+"_"+curDate+"_PMf_"+this.selectOverlay+".png";
+
+        this.mapOverlay.setImage(file);
+        this.mapOverlay.setOpacity(this.mapOverlayOpacity);
+        var bounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(21.6987,119.749),
+          new google.maps.LatLng(25.3707, 121.9));
+
+        this.mapOverlay.setBound(bounds);
+      }
+      
+      var dateOffset = 0;
+      switch(this.selectOverlay){
+        case "A0": dateOffset = 0; break;
+        case "F1": dateOffset = 1; break;
+        case "F2": dateOffset = 2; break;
+        case "F3": dateOffset = 3; break;
+      }
+      var selectDate = moment(this.currentDate,"YYYY-MM-DD").clone().add(dateOffset, 'days').format("YYYY-MM-DD");
+      
+      function clickFn(d){ 
+        return function() {
+          var str = "<strong>"+d.name+"</strong><br>";
+          str += d.date+"<br>";
+          str += "PMf: "+d.value;
+          var loc = new google.maps.LatLng(d.lat, d.lng);
+          var win = new google.maps.InfoWindow();
+          win.setOptions({content: str, position: loc});
+          win.open(d.map);
+        };
+      };
+
+      //add company markers
+      var btraj = this.btrajData[this.currentDate][selectDate];
+      for(var companyKey in btraj){
+        if(!(companyKey in this.companyHash)) continue;
+        var company = this.companyHash[companyKey][0];
+        var pmf = parseFloat(btraj[companyKey][0].PMf);
+        var color = this.MapValueToColor(pmf);
+
+        company.marker = new google.maps.Circle({
+          strokeColor: '#FF0000',
+          strokeOpacity: 0.8,
+          strokeWeight: 1,
+          fillColor: color,
+          fillOpacity: 0.5,
+          map: this.map,
+          center: new google.maps.LatLng(company.lat,company.lon),
+          radius: 5000
+        });
+        var d = {map: this.map, value: pmf};
+        d.name = company.company_name;
+        d.lat = company.lat;
+        d.lng = company.lon;
+        d.date = selectDate;
+        company.marker.addListener('click', clickFn(d));
+        
+      }
+      //add station marker
+      var obs = this.btrajObs[selectDate][0].obs;
+      var color = this.MapValueToColor(obs);
+      if(this.selectStation in this.stationHash){
+        var station = this.stationHash[this.selectStation][0];
+        station.marker = new google.maps.Marker({
+          position: new google.maps.LatLng(station.lat,station.lon),
+          map: this.map,
+          title: station.station_name+" "+obs
+        });
+        var d = {map: this.map, value: pmf};
+        d.name = station.station_name+" 觀測站";
+        d.lat = station.lat;
+        d.lng = station.lon;
+        d.date = selectDate;
+        station.marker.addListener('click', clickFn(d));
+      }
+
+
+    },
+    ChangePage: function(i){
+      this.activePage = i;
+      this.UpdateAll();
     },
     ToggleSidePanel: function(){
       this.openSidePanel = !this.openSidePanel;
@@ -114,15 +238,13 @@ var g_APP = new Vue({
       }
     },
     ChangeStation: function(){
-      this.UpdateImage();
-      this.UpdateBtrajGraph();
+      this.UpdateAll();
     },
     ChangeFactory: function(){
       this.UpdateImage();
     },
     ChangeDate: function(){
-      this.UpdateImage();
-      this.UpdateBtrajGraph();
+      this.UpdateAll();
     },
     ChangeTime: function(){
       var selectDate = moment(this.currentDate,"YYYY-MM-DD");
@@ -134,6 +256,10 @@ var g_APP = new Vue({
       http.open('HEAD', url, false);
       http.send();
       return http.status != 404;
+    },
+    UpdateAll: function(){
+      this.UpdateImage();
+      this.UpdateBtrajGraph();
     },
     UpdateImage: function(){
       var selectDate = moment(this.currentDate,"YYYY-MM-DD");
@@ -198,9 +324,7 @@ var g_APP = new Vue({
       var curDate = selectDate.format("YYYYMMDD");
       var maxDate = selectDate.clone().add(3, 'days').format("YYYYMMDD");
       this.btrajMaxValue = 0;
-      var companyHash = d3.nest()
-          .key(function(d){return d.company_id;})
-          .map(this.companyArr);
+      
 
       var url = "/data/btraj.php?expMin="+minDate;
       url += "&expMax="+curDate;
@@ -221,10 +345,10 @@ var g_APP = new Vue({
             if(pmf > this.btrajMaxValue) this.btrajMaxValue = pmf;
             if(!("PMfstrS" in date)) continue;
             for(var companyKey in date){
-              if(!(companyKey in companyHash)) continue;
+              if(!(companyKey in this.companyHash)) continue;
               date[companyKey][0].date = dateKey;
-              date[companyKey][0].company_name = companyHash[companyKey][0].company_name;
-              if(companyHash[companyKey][0].serial < 6) continue;
+              date[companyKey][0].company_name = this.companyHash[companyKey][0].company_name;
+              if(this.companyHash[companyKey][0].serial < 6) continue;
               date["PMfstrS"][0].PMf -= date[companyKey][0].PMf;
             }
           }
@@ -240,6 +364,9 @@ var g_APP = new Vue({
             .map(this.btrajObs);
 
           this.DrawBtrajGraph();
+
+          if(this.activePage == 3) this.UpdateMap();
+
         }.bind(this));
       }.bind(this));
     },
