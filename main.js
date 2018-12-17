@@ -3,12 +3,12 @@ var g_APP = new Vue({
   data: {
     activePage: 1,
     openSidePanel: false,
-    currentTime: "2017-01-07 00:00",
-    currentDate: "2017-01-07",
-    timebarMin: 0,
+    currentTime: "",
+    currentDate: "2017-12-01",
+    timebarMin: 1,
     timebarMax: 96,
-    timebarValue: 0,
-    selectStation: "EPA036",
+    timebarValue: 1,
+    selectStation: "EPA035",
     selectFactory: "L0200473",
     selectPollution: "pmf",
     selectImage: "image/no-image.png",
@@ -25,7 +25,10 @@ var g_APP = new Vue({
     map: null,
     mapOverlay: "",
     mapOverlayOpacity: 0.5,
-    selectOverlay: "A0"
+    selectOverlay: "A0",
+    aiImages: {},
+    timeStatus: "stop",
+    playTimer: null
   },
   created: function () {
     $.get("/data/station.php",function(result){
@@ -88,8 +91,9 @@ var g_APP = new Vue({
       //console.log(this.companyHash);
 
       google.maps.event.addDomListener(window, 'load', this.InitMap);
-      this.UpdateImage();
+      this.currentTime = this.currentDate+" 00:00";
       this.UpdateBtrajGraph();
+      this.UpdateBtrajImage();
     }.bind(this));
     
     
@@ -178,6 +182,8 @@ var g_APP = new Vue({
       };
 
       //add company markers
+      if(!(this.currentDate in this.btrajData)) return;
+      if(!(selectDate in this.btrajData[this.currentDate])) return;
       var btraj = this.btrajData[this.currentDate][selectDate];
       for(var companyKey in btraj){
         if(!(companyKey in this.companyHash)) continue;
@@ -238,18 +244,21 @@ var g_APP = new Vue({
       }
     },
     ChangeStation: function(){
-      this.UpdateAll();
+      this.UpdateBtrajGraph();
+      this.UpdateBtrajImage();
+      this.UpdateMap();
     },
     ChangeFactory: function(){
-      this.UpdateImage();
+      this.UpdateFtrajImage();
     },
     ChangeDate: function(){
       this.UpdateAll();
     },
     ChangeTime: function(){
       var selectDate = moment(this.currentDate,"YYYY-MM-DD");
-      var selectTime = selectDate.add(this.timebarValue, 'hours');
+      var selectTime = selectDate.clone().add(this.timebarValue, 'hours');
       this.currentTime = selectTime.format("YYYY-MM-DD HH:mm");
+      this.UpdateAIImage();
     },
     CheckImageExist: function(url){
       var http = new XMLHttpRequest();
@@ -258,31 +267,14 @@ var g_APP = new Vue({
       return http.status != 404;
     },
     UpdateAll: function(){
-      this.UpdateImage();
       this.UpdateBtrajGraph();
+      this.UpdateBtrajImage();
+      this.UpdateFtrajImage();
+      this.UpdateAIImage();
+      this.UpdateMap();
     },
-    UpdateImage: function(){
+    UpdateFtrajImage: function(){
       var selectDate = moment(this.currentDate,"YYYY-MM-DD");
-      //btraj
-      this.btrajImages = [];
-      var path = "forWEBsite/grads/btraj/RSM_PETA/hourly/"+selectDate.format("YYYYMMDD")+"/";
-      for(var i=0;i<10;i++){
-        var str = "";
-        if(i<7){
-          var targetDate = selectDate.clone().add(i-6, 'days').format("YYYYMMDD");
-          str = path+"b_avg_"+this.selectStation+"_"+targetDate+"_7.png";
-        }
-        else{
-          var targetDate = selectDate.format("YYYYMMDD");
-          str = path+"b_avg_"+this.selectStation+"_"+targetDate+"_"+(i+1)+".png";
-        }
-        if(this.CheckImageExist(str)){
-          this.btrajImages.push(str);
-        }
-        else{
-          this.btrajImages.push("image/no-image.png");
-        }
-      }
       //ftraj
       this.ftrajImages = [];
       var path = "forWEBsite/grads/ftraj/"+selectDate.format("YYYYMMDD")+"/";
@@ -303,6 +295,44 @@ var g_APP = new Vue({
           this.ftrajImages.push("image/no-image.png");
         }
       }
+      this.UpdateAIImage();
+    },
+    UpdateBtrajImage: function(){
+      var selectDate = moment(this.currentDate,"YYYY-MM-DD");
+      //btraj
+      this.btrajImages = [];
+      var path = "forWEBsite/grads/btraj/RSM_PETA/daily/"+selectDate.format("YYYYMMDD")+"/";
+      for(var i=0;i<10;i++){
+        var str = "";
+        if(i<7){
+          var targetDate = selectDate.clone().add(i-6, 'days').format("YYYYMMDD");
+          str = path+"b_avg_"+this.selectStation+"_"+targetDate+"_7.png";
+        }
+        else{
+          var targetDate = selectDate.format("YYYYMMDD");
+          str = path+"b_avg_"+this.selectStation+"_"+targetDate+"_"+(i+1)+".png";
+        }
+        if(this.CheckImageExist(str)){
+          this.btrajImages.push(str);
+        }
+        else{
+          this.btrajImages.push("image/no-image.png");
+        }
+      }
+    },
+    UpdateAIImage: function(){
+      var selectDate = moment(this.currentDate,"YYYY-MM-DD");
+      var selectTime = selectDate.clone().add(this.timebarValue-1, 'hours');
+      var curTime = selectTime.format("YYYY-MM-DD_HH");
+      //ai
+      this.aiImages = {};
+      var gtxPath = "forWEBsite/grads/ai/gtx/"+selectDate.format("YYYY-MM-DD")+"/";
+      var obsPath = "forWEBsite/grads/ai/obs/"+selectDate.format("YYYY-MM-DD")+"/";
+      var aiPath = "forWEBsite/grads/ai/ai/"+selectDate.format("YYYY-MM-DD")+"/";
+      this.aiImages["gtx"] = gtxPath+"forecast_F"+this.timebarValue+"_"+curTime+".jpg";
+      this.aiImages["obs"] = obsPath+"observe_F"+this.timebarValue+"_"+curTime+".jpg";
+      this.aiImages["ai"] = aiPath+"PCAAR_F"+this.timebarValue+"_"+curTime+".jpg";
+      this.$forceUpdate();
     },
     OpenImageBox: function(url){
       this.selectImage = url;
@@ -362,6 +392,11 @@ var g_APP = new Vue({
           this.btrajObs = d3.nest()
             .key(function(d){return d.d;})
             .map(this.btrajObs);
+
+          for(var dateKey in this.btrajObs){
+            var pmf = parseFloat(this.btrajObs[dateKey][0].obs);
+            if(pmf > this.btrajMaxValue) this.btrajMaxValue = pmf;
+          }
 
           this.DrawBtrajGraph();
 
@@ -427,6 +462,7 @@ var g_APP = new Vue({
       var rectGroup = svg.append("g");
 
       function DrawHistogram(company, data, offsetX){
+        if(!data) return;
         var offsetY = 0;
         for(var j=1;j<company.length;j++){
           var c = company[j].company_id;
@@ -474,15 +510,20 @@ var g_APP = new Vue({
       //draw 7 day analysis
       for(var i=-6;i<=0;i++){
         var date = selectDate.clone().add(i, 'days').format("YYYY-MM-DD");
+        if(!(date in this.btrajData)) continue;
+        if(!(date in this.btrajData[date])) continue;
         var data = this.btrajData[date][date];
         DrawHistogram(this.companyArr,data,i+6);
       }
       //draw 3 day forecast
-      var expData = this.btrajData[this.currentDate];
-      for(var i=1;i<=3;i++){
-        var date = selectDate.clone().add(i, 'days').format("YYYY-MM-DD");
-        var data = expData[date];
-        DrawHistogram(this.companyArr,expData[date],i+6);
+      if(this.currentDate in this.btrajData){
+        var expData = this.btrajData[this.currentDate];
+        for(var i=1;i<=3;i++){
+          var date = selectDate.clone().add(i, 'days').format("YYYY-MM-DD");
+          if(!(date in expData)) continue;
+          var data = expData[date];
+          DrawHistogram(this.companyArr,data,i+6);
+        }
       }
 
       //draw observe value
@@ -545,6 +586,33 @@ var g_APP = new Vue({
         }).text(lineData[i].date);
       }
 
+    },
+    PlayTimebar: function(){
+      this.timeStatus = "play";
+      this.playTimer = setInterval(function(){
+        this.timebarValue++;
+        if(this.timebarValue > this.timebarMax){
+          this.timebarValue = this.timebarMax;
+          clearInterval(this.playTimer);
+          this.playTimer = null;
+        }
+        this.ChangeTime();
+      }.bind(this),300);
+    },
+    StopTimebar: function(){
+      this.timeStatus = "stop";
+      clearInterval(this.playTimer);
+      this.playTimer = null;
+    },
+    PrevTime: function(){
+      this.timebarValue--;
+      if(this.timebarValue < this.timebarMin) this.timebarValue = this.timebarMin;
+      this.ChangeTime();
+    },
+    NextTime: function(){
+      this.timebarValue++;
+      if(this.timebarValue > this.timebarMax) this.timebarValue = this.timebarMax;
+      this.ChangeTime();
     }
   }
 });

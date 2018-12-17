@@ -65,11 +65,26 @@
 
         <div class="ai-correct" v-show="activePage == 4">
           <div class="content-title">AI修正結果</div>
+            <div class="category">預報第 {{timebarValue}} 小時 {{currentTime}}</div>
+            <div class="image-container">
+              <div>
+                <div class="image-title">GTx</div>
+                <img class="image-content" v-bind:src="aiImages['gtx']" v-on:click="OpenImageBox(aiImages['gtx']);">
+              </div>
+              <div>
+                <div class="image-title">GTx + AI</div>
+                <img class="image-content" v-bind:src="aiImages['ai']" v-on:click="OpenImageBox(aiImages['ai']);">
+              </div>
+              <div>
+                <div class="image-title">觀測</div>
+                <img class="image-content" v-bind:src="aiImages['obs']" v-on:click="OpenImageBox(aiImages['obs']);">
+              </div>
+            </div>
         </div>
 
         <div class="timebar">
           <div class="option-bar" v-show="activePage != 0">
-            <input type="date" v-model="currentDate" v-on:change="ChangeDate();">
+            <input type="date" v-model="currentDate" v-on:input="ChangeDate();">
             
             <select v-model="selectStation" v-on:change="ChangeStation();" v-show="activePage == 1 || activePage == 3">
               <option v-for="s in stationArr" v-bind:value="s.station_id">{{s.station_name}}</option>
@@ -82,19 +97,23 @@
               <option value="F3">預報第三天</option>
             </select>
 
-            <select v-model="selectPollution" v-on:change="ChangePollution();" v-show="activePage == 1">
+            <!--<select v-model="selectPollution" v-on:change="ChangePollution();" v-show="activePage == 1">
               <option value="pmf">PM2.5</option>
               <option value="pm10">PM10</option>
               <option value="so2">SO2</option>
               <option value="nox">NOx</option>
-            </select>
+            </select>-->
 
             <select v-model="selectFactory" v-on:change="ChangeFactory();" v-show="activePage == 2">
               <option v-for="c in companyArr" v-bind:value="c.company_id">{{c.company_name}}</option>
             </select>
 
-            <div class="option-bar" v-show="activePage == 1 || activePage == 4">
-              小時 <input type="range" v-bind:min="timebarMin" v-bind:max="timebarMax" v-model="timebarValue" v-on:change="ChangeTime();">
+            <div class="player-bar" v-show="activePage == 4">
+              <img class="icon" src="image/prev-icon.png" v-on:click="PrevTime();">
+              <img class="icon" src="image/play-icon.png" v-show="timeStatus=='stop'" v-on:click="PlayTimebar();">
+              <img class="icon" src="image/stop-icon.png" v-show="timeStatus=='play'" v-on:click="StopTimebar();">
+              <img class="icon" src="image/next-icon.png" v-on:click="NextTime();">
+              <input type="range" v-bind:min="timebarMin" v-bind:max="timebarMax" v-model="timebarValue" v-on:input="ChangeTime();">
             </div>
           </div>
           
