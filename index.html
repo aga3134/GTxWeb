@@ -31,8 +31,10 @@
         <div class="btraj" v-show="activePage == 1">
           <div class="content-title">測站7日分析及3日預報</div>
           <div class="graph-container">
-            <svg id="btrajGraph"></svg>
-            <div id="hoverDialog">123</div>
+            <div class="svg-container">
+              <svg id="btrajGraph"></svg>
+              <div id="hoverDialog"></div>
+            </div>
             <div class="company-list">
               <div class="company-switch" v-for="(c,i) in companyArr" v-on:click="SwitchCompany(i);">
                 <div v-if="c.active" class="icon" v-bind:style="{'background-color':c.color}">&nbsp;</div>
@@ -113,7 +115,7 @@
               <img class="icon" src="image/play-icon.png" v-show="timeStatus=='stop'" v-on:click="PlayTimebar();">
               <img class="icon" src="image/stop-icon.png" v-show="timeStatus=='play'" v-on:click="StopTimebar();">
               <img class="icon" src="image/next-icon.png" v-on:click="NextTime();">
-              <input type="range" v-bind:min="timebarMin" v-bind:max="timebarMax" v-model="timebarValue" v-on:input="ChangeTime();">
+              <input type="range" v-bind:min="timebarMin" v-bind:max="timebarMax" v-model="timebarValue" v-on:input="ChangeTime();"> {{timebarValue}}
             </div>
           </div>
           

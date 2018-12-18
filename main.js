@@ -332,7 +332,12 @@ var g_APP = new Vue({
       this.aiImages["gtx"] = gtxPath+"forecast_F"+this.timebarValue+"_"+curTime+".jpg";
       this.aiImages["obs"] = obsPath+"observe_F"+this.timebarValue+"_"+curTime+".jpg";
       this.aiImages["ai"] = aiPath+"PCAAR_F"+this.timebarValue+"_"+curTime+".jpg";
-      this.$forceUpdate();
+      for(var key in this.aiImages){
+        if(!this.CheckImageExist(this.aiImages[key])){
+          this.aiImages[key] = "image/no-image.png";
+        }
+      }
+      //this.$forceUpdate();
     },
     OpenImageBox: function(url){
       this.selectImage = url;

@@ -110,17 +110,20 @@ html, body {
       align-items: flex-start;
       flex-wrap: wrap; }
       .gtx-web .main-content .grads-container img {
-        width: 300px;
+        width: 280px;
         margin: 10px; }
     .gtx-web .main-content .graph-container {
       position: relative; }
-    .gtx-web .main-content #btrajGraph {
-      display: block;
-      padding: 10px;
-      width: 800px;
+    .gtx-web .main-content .svg-container {
+      position: relative;
+      width: 1024px;
       max-width: 100%;
       margin: auto;
-      height: 400px; }
+      height: 400px;
+      padding: 10px; }
+    .gtx-web .main-content #btrajGraph {
+      width: 100%;
+      height: 100%; }
     .gtx-web .main-content #hoverDialog {
       position: absolute;
       top: 0px;
