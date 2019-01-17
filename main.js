@@ -353,6 +353,33 @@ var g_APP = new Vue({
       }
       this.DrawBtrajGraph();
     },
+    ComputeOversea: function(){
+      //console.log(this.btrajData);
+      //console.log(this.btrajObs);
+      //console.log(this.stationHash);
+      //((EPA064觀測PMf - EPA061觀測PMf - 5) / 3.2301) * (lat 該測站緯度 - 21.9560) +  EPA061觀測PMf
+      
+      for(var expKey in this.btrajData){
+        var expDate = this.btrajData[expKey];
+        for(var dateKey in expDate){
+          var date = expDate[dateKey];
+          if(!this.btrajObs["EPA064"][dateKey] || !this.btrajObs["EPA061"][dateKey]){
+            date["oversea"][0].PMf = 0;
+            continue;
+          }
+          var EPA064 = parseFloat(this.btrajObs["EPA064"][dateKey][0].obs);
+          var EPA061 = parseFloat(this.btrajObs["EPA061"][dateKey][0].obs);
+          var lat = parseFloat(this.stationHash[this.selectStation][0].lat);
+          var oversea = ((EPA064-EPA061-5)/3.2301)*(lat-21.9560)+EPA061;
+          if(EPA064 < 10 || EPA061 < 5 || oversea < 0){
+            date["oversea"][0].PMf = 0;
+          }
+          else{
+            date["oversea"][0].PMf = oversea;
+          }
+        }
+      }
+    },
     UpdateBtrajGraph: function(){
       var selectDate = moment(this.currentDate,"YYYY-MM-DD");
       var minDate = selectDate.clone().add(-6, 'days').format("YYYYMMDD");
@@ -391,18 +418,18 @@ var g_APP = new Vue({
 
         url = "/data/obs.php?minDate="+minDate;
         url += "&maxDate="+maxDate;
-        url += "&station="+this.selectStation;
         $.get(url,function(obsData){
           this.btrajObs = JSON.parse(obsData);
           this.btrajObs = d3.nest()
+            .key(function(d){return d.station_id;})
             .key(function(d){return d.d;})
             .map(this.btrajObs);
 
-          for(var dateKey in this.btrajObs){
-            var pmf = parseFloat(this.btrajObs[dateKey][0].obs);
+          for(var dateKey in this.btrajObs[this.selectStation]){
+            var pmf = parseFloat(this.btrajObs[this.selectStation][dateKey][0].obs);
             if(pmf > this.btrajMaxValue) this.btrajMaxValue = pmf;
           }
-
+          this.ComputeOversea();
           this.DrawBtrajGraph();
 
           if(this.activePage == 3) this.UpdateMap();
@@ -543,7 +570,7 @@ var g_APP = new Vue({
       else if(w < 800) cutIndex = 5;
       for(var i=-6;i<=3;i++){
         var date = selectDate.clone().add(i, 'days').format("YYYY-MM-DD");
-        var data = this.btrajObs[date];
+        var data = this.btrajObs[this.selectStation][date];
         lineData.push({
           x:(i+6.5)*wStep+padL,
           y:scaleH(parseFloat(data[0].obs))+padT,
