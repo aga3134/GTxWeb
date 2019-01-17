@@ -4,11 +4,11 @@ var g_APP = new Vue({
     activePage: 1,
     openSidePanel: false,
     currentTime: "",
-    currentDate: "2017-12-01",
+    currentDate: "2019-01-07",   //kcku20190107 change
     timebarMin: 1,
     timebarMax: 96,
     timebarValue: 1,
-    selectStation: "EPA035",
+    selectStation: "EPA037",   //kcku20190107 change
     selectFactory: "L0200473",
     selectPollution: "pmf",
     selectImage: "image/no-image.png",
@@ -31,7 +31,7 @@ var g_APP = new Vue({
     playTimer: null
   },
   created: function () {
-    $.get("/data/station.php",function(result){
+    $.get("data/station.php",function(result){
       this.stationArr = JSON.parse(result);
       this.stationHash = d3.nest()
           .key(function(d){return d.station_id;})
@@ -40,7 +40,7 @@ var g_APP = new Vue({
     }.bind(this));
     
 
-    $.get("/data/company.php",function(result){
+    $.get("data/company.php",function(result){
       this.companyArr = JSON.parse(result);
       //customize data
       for(var i=0;i<this.companyArr.length;i++){
@@ -281,6 +281,7 @@ var g_APP = new Vue({
       for(var i=0;i<10;i++){
         var str = "";
         if(i<7){
+          var path = "forWEBsite/grads/ftraj/"+selectDate.clone().add(i-6, 'days').format("YYYYMMDD")+"/";   //kcku20190107 add
           var targetDate = selectDate.clone().add(i-6, 'days').format("YYYYMMDD");
           str = path+"f_avg_"+this.selectFactory+"_"+targetDate+"_7.png";
         }
@@ -301,10 +302,11 @@ var g_APP = new Vue({
       var selectDate = moment(this.currentDate,"YYYY-MM-DD");
       //btraj
       this.btrajImages = [];
-      var path = "forWEBsite/grads/btraj/RSM_PETA/daily/"+selectDate.format("YYYYMMDD")+"/";
+      var path = "forWEBsite/grads/btraj/"+selectDate.format("YYYYMMDD")+"/";   //kcku20190107 change path
       for(var i=0;i<10;i++){
         var str = "";
         if(i<7){
+          var path = "forWEBsite/grads/btraj/"+selectDate.clone().add(i-6, 'days').format("YYYYMMDD")+"/";   //kcku20190107 add
           var targetDate = selectDate.clone().add(i-6, 'days').format("YYYYMMDD");
           str = path+"b_avg_"+this.selectStation+"_"+targetDate+"_7.png";
         }
@@ -332,6 +334,7 @@ var g_APP = new Vue({
       this.aiImages["gtx"] = gtxPath+"forecast_F"+this.timebarValue+"_"+curTime+".jpg";
       this.aiImages["obs"] = obsPath+"observe_F"+this.timebarValue+"_"+curTime+".jpg";
       this.aiImages["ai"] = aiPath+"PCAAR_F"+this.timebarValue+"_"+curTime+".jpg";
+      console.log(this.timebarValue);
       for(var key in this.aiImages){
         if(!this.CheckImageExist(this.aiImages[key])){
           this.aiImages[key] = "image/no-image.png";
@@ -361,7 +364,7 @@ var g_APP = new Vue({
       this.btrajMaxValue = 0;
       
 
-      var url = "/data/btraj.php?expMin="+minDate;
+      var url = "data/btraj.php?expMin="+minDate;
       url += "&expMax="+curDate;
       url += "&station="+this.selectStation;
       $.get(url,function(btrajData){
@@ -389,7 +392,7 @@ var g_APP = new Vue({
           }
         }
 
-        url = "/data/obs.php?minDate="+minDate;
+        url = "data/obs.php?minDate="+minDate;
         url += "&maxDate="+maxDate;
         url += "&station="+this.selectStation;
         $.get(url,function(obsData){
@@ -544,6 +547,7 @@ var g_APP = new Vue({
       for(var i=-6;i<=3;i++){
         var date = selectDate.clone().add(i, 'days').format("YYYY-MM-DD");
         var data = this.btrajObs[date];
+	if(!data) continue;
         lineData.push({
           x:(i+6.5)*wStep+padL,
           y:scaleH(parseFloat(data[0].obs))+padT,
